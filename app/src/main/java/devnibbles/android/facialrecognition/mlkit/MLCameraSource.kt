@@ -29,8 +29,6 @@ import android.view.WindowManager
 import androidx.annotation.RequiresPermission
 import com.google.android.gms.common.images.Size
 import devnibbles.android.facialrecognition.common.GraphicOverlay
-import devnibbles.android.facialrecognition.common.GraphicOverlay.Companion.CAMERA_FACING_BACK
-import devnibbles.android.facialrecognition.common.GraphicOverlay.Companion.CAMERA_FACING_FRONT
 import devnibbles.android.facialrecognition.common.ICameraSource
 
 import java.io.IOException
@@ -49,7 +47,7 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
 
     private var camera: Camera? = null
 
-    private var cameraFacing = CAMERA_FACING_FRONT
+    private var cameraFacing = GraphicOverlay.CAMERA_FACING_FRONT
     private var previewSize: Size? = null
 
     /**
@@ -240,7 +238,7 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
     /** Changes the facing of the camera.  */
     @Synchronized
     fun setFacing(facing: Int) {
-        if (facing != CAMERA_FACING_BACK && facing != CAMERA_FACING_FRONT) {
+        if (facing != GraphicOverlay.CAMERA_FACING_BACK && facing != GraphicOverlay.CAMERA_FACING_FRONT) {
             throw IllegalArgumentException("Invalid camera: $facing")
         }
         this.cameraFacing = facing

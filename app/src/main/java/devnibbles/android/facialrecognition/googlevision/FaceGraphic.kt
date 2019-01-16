@@ -21,10 +21,6 @@ class FaceGraphic(graphicOverlay: GraphicOverlay) : AbstractFaceGraphic(graphicO
     }
 
     override fun leftEyePosition() : PointF? {
-//        System.out.println("leftEyePosition : " + face?.landmarks?.size)
-//        face?.landmarks?.forEach {
-//            System.out.println("it : " + it.type + " : " + Landmark.LEFT_EYE + " : " + Landmark.RIGHT_EYE)
-//        }
         return face?.landmarks?.firstOrNull { it.type == Landmark.LEFT_EYE }?.position
     }
 
