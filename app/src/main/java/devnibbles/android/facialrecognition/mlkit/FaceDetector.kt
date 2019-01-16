@@ -18,7 +18,7 @@ import java.nio.ByteBuffer
  *
  * @param <T> The type of the detected feature.
  */
-class FaceDetector(private val callback: DetectorCallback?):IFrameProcessor {
+class FaceDetector(private val callback: DetectorCallback?) : IFrameProcessor {
 
     interface DetectorCallback {
         fun onSuccess(frameData: ByteBuffer, results: List<FirebaseVisionFace>, frameMetadata: FrameMetadata)
@@ -51,10 +51,7 @@ class FaceDetector(private val callback: DetectorCallback?):IFrameProcessor {
     private var processingMetaData: FrameMetadata? = null
 
     @Synchronized
-    override fun process(
-        data: ByteBuffer,
-        frameMetadata: FrameMetadata
-    ) {
+    override fun process(data: ByteBuffer, frameMetadata: FrameMetadata) {
         latestImage = data
         latestImageMetaData = frameMetadata
         if (processingImage == null && processingMetaData == null) {
@@ -73,33 +70,24 @@ class FaceDetector(private val callback: DetectorCallback?):IFrameProcessor {
         }
     }
 
-    private fun processImage(
-        data: ByteBuffer,
-        frameMetadata: FrameMetadata
-    ) {
+    private fun processImage(data: ByteBuffer, frameMetadata: FrameMetadata) {
         val metadata = FirebaseVisionImageMetadata.Builder()
-                .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
-                .setWidth(frameMetadata.width)
-                .setHeight(frameMetadata.height)
-                .setRotation(frameMetadata.rotation)
-                .build()
+            .setFormat(FirebaseVisionImageMetadata.IMAGE_FORMAT_NV21)
+            .setWidth(frameMetadata.width)
+            .setHeight(frameMetadata.height)
+            .setRotation(frameMetadata.rotation)
+            .build()
 
-        detectInVisionImage(
-                data,
-                FirebaseVisionImage.fromByteBuffer(data, metadata), frameMetadata)
-    }
+        val image = FirebaseVisionImage.fromByteBuffer(data, metadata)
 
-    private fun detectInVisionImage(
-            frameData: ByteBuffer,
-        image: FirebaseVisionImage,
-        metadata: FrameMetadata?
-    ) {
         delegateDetector.detectInImage(image)
-                .addOnSuccessListener { results ->
-                    callback?.onSuccess(frameData, results, metadata!!)
-                    processLatestImage()
-                }
-                .addOnFailureListener { e -> callback?.onFailure(e) }
+            .addOnSuccessListener { results ->
+                callback?.onSuccess(data, results, frameMetadata)
+                processLatestImage()
+            }
+            .addOnFailureListener { e ->
+                callback?.onFailure(e)
+            }
     }
 
     override fun stop() {
