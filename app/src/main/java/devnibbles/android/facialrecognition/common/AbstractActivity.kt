@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.core.app.ActivityCompat
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.snackbar.Snackbar
 import devnibbles.android.facialrecognition.R
 
@@ -16,10 +18,9 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "AbstractActivity"
-        @JvmStatic
-        protected val RC_HANDLE_GMS = 9001
-        @JvmStatic
-        protected val RC_HANDLE_CAMERA_PERM = 2
+
+        private const val RC_HANDLE_GMS = 9001
+        private const val RC_HANDLE_CAMERA_PERM = 2
     }
 
     protected lateinit var mCameraPreview: CameraSourcePreview
@@ -83,6 +84,8 @@ abstract class AbstractActivity : AppCompatActivity() {
 
     abstract fun startCameraSource()
 
+    abstract fun releaseCameraSource()
+
 
     /**
      * Restarts the camera.
@@ -99,6 +102,20 @@ abstract class AbstractActivity : AppCompatActivity() {
     override fun onPause() {
         super.onPause()
         mCameraPreview.stop()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        releaseCameraSource()
+    }
+
+    protected fun checkGooglePlayServices() {
+        // check that the device has play services available.
+        val code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(applicationContext)
+        if (code != ConnectionResult.SUCCESS) {
+            GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS).show()
+        }
     }
 
     /**

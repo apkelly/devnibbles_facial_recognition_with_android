@@ -1,9 +1,13 @@
 package devnibbles.android.facialrecognition.mlkit
 
+import android.util.Log
 import androidx.annotation.GuardedBy
-import com.google.android.gms.tasks.Task
+import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
+import com.google.firebase.ml.vision.face.FirebaseVisionFace
+import com.google.firebase.ml.vision.face.FirebaseVisionFaceDetectorOptions
+import java.io.IOException
 
 import java.nio.ByteBuffer
 
@@ -14,7 +18,23 @@ import java.nio.ByteBuffer
  *
  * @param <T> The type of the detected feature.
  */
-abstract class AbstractVisionProcessor<T> {
+class FaceDetector(private val callback: DetectorCallback?):IFrameProcessor {
+
+    interface DetectorCallback {
+        fun onSuccess(frameData: ByteBuffer, results: List<FirebaseVisionFace>, frameMetadata: FrameMetadata)
+        fun onFailure(exception: Exception)
+    }
+
+    companion object {
+        private const val TAG = "FaceDetector"
+    }
+
+    private val delegateDetector = FirebaseVision.getInstance()
+        .getVisionFaceDetector(
+            FirebaseVisionFaceDetectorOptions.Builder()
+                .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
+                .build()
+        )
 
     // To keep the latest images and its metadata.
     @GuardedBy("this")
@@ -31,7 +51,7 @@ abstract class AbstractVisionProcessor<T> {
     private var processingMetaData: FrameMetadata? = null
 
     @Synchronized
-    fun process(
+    override fun process(
         data: ByteBuffer,
         frameMetadata: FrameMetadata
     ) {
@@ -74,29 +94,20 @@ abstract class AbstractVisionProcessor<T> {
         image: FirebaseVisionImage,
         metadata: FrameMetadata?
     ) {
-        detectInImage(image)
+        delegateDetector.detectInImage(image)
                 .addOnSuccessListener { results ->
-                    onSuccess(frameData, results,
-                            metadata!!)
+                    callback?.onSuccess(frameData, results, metadata!!)
                     processLatestImage()
                 }
-                .addOnFailureListener { e -> onFailure(e) }
+                .addOnFailureListener { e -> callback?.onFailure(e) }
     }
 
-    abstract fun stop()
+    override fun stop() {
+        try {
+            delegateDetector.close()
+        } catch (e: IOException) {
+            Log.e(TAG, "Exception thrown while trying to close Face Detector: $e")
+        }
+    }
 
-    protected abstract fun detectInImage(image: FirebaseVisionImage): Task<T>
-
-    /**
-     * Callback that executes with a successful detection result.
-     *
-     * image.
-     */
-    protected abstract fun onSuccess(
-            frameData: ByteBuffer,
-        results: T,
-        frameMetadata: FrameMetadata
-    )
-
-    protected abstract fun onFailure(e: Exception)
 }

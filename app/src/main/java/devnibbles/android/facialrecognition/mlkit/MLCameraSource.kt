@@ -19,7 +19,6 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.graphics.ImageFormat
-import android.graphics.SurfaceTexture
 import android.hardware.Camera
 import android.hardware.Camera.CameraInfo
 import android.util.Log
@@ -56,7 +55,6 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
      */
     private var rotation: Int = 0
 
-
     // These values may be requested by the caller.  Due to hardware limitations, we may need to
     // select close, but not exactly the same values for these.
     private val requestedFps = 20.0f
@@ -72,11 +70,6 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
     private val requestedPreviewWidth = 640
     private val requestedPreviewHeight = 480
     private val requestedAutoFocus = true
-
-    // These instances need to be held onto to avoid GC of their underlying resources.  Even though
-    // these aren't used outside of the method that creates them, they still must have hard
-    // references maintained to them.
-    private var dummySurfaceTexture: SurfaceTexture? = null
 
     // True if a SurfaceTexture is being used for the preview, false if a SurfaceHolder is being
     // used for the preview.  We want to be compatible back to Gingerbread, but SurfaceTexture
@@ -95,7 +88,7 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
 
     private val processorLock = Any()
     // @GuardedBy("processorLock")
-    private var frameProcessor: AbstractVisionProcessor<*>? = null
+    private var frameProcessor: IFrameProcessor? = null
 
     /**
      * Map to convert between a byte array, received from the camera, and its associated byte buffer.
@@ -135,33 +128,6 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
                 frameProcessor!!.stop()
             }
         }
-    }
-
-    /**
-     * Opens the camera and starts sending preview frames to the underlying detector. The preview
-     * frames are not displayed.
-     *
-     * @throws IOException if the camera's preview texture or display could not be initialized
-     */
-    @SuppressLint("MissingPermission")
-    @RequiresPermission(Manifest.permission.CAMERA)
-    @Synchronized
-    @Throws(IOException::class)
-    fun start(): MLCameraSource {
-        if (camera != null) {
-            return this
-        }
-
-        camera = createCamera()
-        dummySurfaceTexture = SurfaceTexture(DUMMY_TEXTURE_NAME)
-        camera!!.setPreviewTexture(dummySurfaceTexture)
-        usingSurfaceTexture = true
-        camera!!.startPreview()
-
-        processingThread = Thread(processingRunnable)
-        processingRunnable.setActive(true)
-        processingThread!!.start()
-        return this
     }
 
     /**
@@ -417,7 +383,7 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
         }
     }
 
-    fun setMachineLearningFrameProcessor(processor: AbstractVisionProcessor<*>) {
+    fun setMachineLearningFrameProcessor(processor: IFrameProcessor) {
         synchronized(processorLock) {
             cleanScreen()
             if (frameProcessor != null) {
@@ -570,20 +536,13 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
     }
 
     companion object {
-        private val TAG = "MLCameraSource"
-
-        /**
-         * The dummy surface texture must be assigned a chosen name. Since we never use an OpenGL context,
-         * we can choose any ID we want here. The dummy surface texture is not a crazy hack - it is
-         * actually how the camera team recommends using the camera without a preview.
-         */
-        private val DUMMY_TEXTURE_NAME = 100
+        private const val TAG = "MLCameraSource"
 
         /**
          * If the absolute difference between a preview size aspect ratio and a picture size aspect ratio
          * is less than this tolerance, they are considered to be the same aspect ratio.
          */
-        private val ASPECT_RATIO_TOLERANCE = 0.01f
+        private const val ASPECT_RATIO_TOLERANCE = 0.01f
 
         /**
          * Gets the id for the camera specified by the direction it is facing. Returns -1 if no such

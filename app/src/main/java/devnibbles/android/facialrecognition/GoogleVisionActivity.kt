@@ -1,8 +1,6 @@
 package devnibbles.android.facialrecognition
 
 import android.util.Log
-import com.google.android.gms.common.ConnectionResult
-import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.MultiProcessor
 import com.google.android.gms.vision.Tracker
@@ -23,11 +21,8 @@ class GoogleVisionActivity : AbstractActivity() {
     private var mCameraSource: GVCameraSource? = null
     private lateinit var mDetector: SaveFrameFaceDetector
 
-
     /**
-     * Creates and starts the camera.  Note that this uses a higher resolution in comparison
-     * to other detection examples to enable the barcode detector to detect small barcodes
-     * at long distances.
+     * Creates and starts the camera.
      */
     override fun createCameraSource() {
         val context = applicationContext
@@ -57,32 +52,10 @@ class GoogleVisionActivity : AbstractActivity() {
     }
 
     /**
-     * Releases the resources associated with the camera source, the associated detector, and the
-     * rest of the processing pipeline.
-     */
-    override fun onDestroy() {
-        super.onDestroy()
-
-        if (mCameraSource != null) {
-            mCameraSource!!.release()
-        }
-    }
-
-    /**
-     * Starts or restarts the camera source, if it exists.  If the camera source doesn't exist yet
-     * (e.g., because onResume was called before the camera source was created), this will be called
-     * again when the camera source is created.
+     * Starts or restarts the camera source, if it exists.
      */
     override fun startCameraSource() {
-
-        // check that the device has play services available.
-        val code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(
-            applicationContext
-        )
-        if (code != ConnectionResult.SUCCESS) {
-            val dlg = GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS)
-            dlg.show()
-        }
+        checkGooglePlayServices()
 
         mCameraSource?.let {
             try {
@@ -95,9 +68,14 @@ class GoogleVisionActivity : AbstractActivity() {
         }
     }
 
-    //==============================================================================================
-    // Graphic Face Tracker
-    //==============================================================================================
+    /**
+     * Releases the resources associated with the camera source.
+     */
+    override fun releaseCameraSource() {
+        if (mCameraSource != null) {
+            mCameraSource!!.release()
+        }
+    }
 
     /**
      * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
@@ -114,7 +92,7 @@ class GoogleVisionActivity : AbstractActivity() {
      * associated face overlay.
      */
     private inner class GraphicFaceTracker internal constructor() : Tracker<Face>() {
-        private var mFaceGraphic:FaceGraphic? = null
+        private var mFaceGraphic: FaceGraphic? = null
 
         /**
          * Start tracking the detected face instance within the face overlay.
@@ -137,7 +115,7 @@ class GoogleVisionActivity : AbstractActivity() {
          * view).
          */
         override fun onMissing(detectionResults: Detector.Detections<Face>) {
-//            mOverlay.remove(mFaceGraphic)
+            mGraphicOverlay.remove(mFaceGraphic)
         }
 
         /**
