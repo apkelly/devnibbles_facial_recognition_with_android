@@ -136,17 +136,19 @@ class GraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attr
     /**
      * Adds a graphic to the overlay.
      */
-    fun add(graphic: Graphic) {
-        synchronized(mLock) {
-            mGraphics.add(graphic)
+    fun add(graphic: Graphic?) {
+        graphic?.let {
+            synchronized(mLock) {
+                mGraphics.add(it)
+            }
+            postInvalidate()
         }
-        postInvalidate()
     }
 
     /**
      * Removes a graphic from the overlay.
      */
-    fun remove(graphic: Graphic) {
+    fun remove(graphic: Graphic?) {
         synchronized(mLock) {
             mGraphics.remove(graphic)
         }
