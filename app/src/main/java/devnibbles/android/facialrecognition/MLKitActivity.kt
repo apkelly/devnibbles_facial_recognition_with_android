@@ -29,7 +29,6 @@ class MLKitActivity : AbstractActivity() {
                 mGraphicOverlay.clear()
 
                 results.forEach {face ->
-                    face.trackingId
                     val faceGraphic = FaceGraphic(face, mGraphicOverlay)
                     mGraphicOverlay.add(faceGraphic)
                 }
