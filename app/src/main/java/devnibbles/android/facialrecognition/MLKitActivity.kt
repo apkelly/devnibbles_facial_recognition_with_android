@@ -66,6 +66,7 @@ class MLKitActivity : AbstractActivity() {
     override fun releaseCameraSource() {
         if (mCameraSource != null) {
             mCameraSource!!.release()
+            mCameraSource = null
         }
     }
 }
