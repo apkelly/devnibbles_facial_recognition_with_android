@@ -1,4 +1,4 @@
-package devnibbles.android.facialrecognition.common
+package devnibbles.android.facialrecognition
 
 import android.Manifest
 import android.app.AlertDialog
@@ -12,7 +12,8 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.material.snackbar.Snackbar
-import devnibbles.android.facialrecognition.R
+import devnibbles.android.facialrecognition.detect.common.CameraSourcePreview
+import devnibbles.android.facialrecognition.detect.common.GraphicOverlay
 
 abstract class AbstractActivity : AppCompatActivity() {
 
@@ -63,7 +64,9 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                 Manifest.permission.CAMERA)) {
-            ActivityCompat.requestPermissions(this, permissions, RC_HANDLE_CAMERA_PERM)
+            ActivityCompat.requestPermissions(this, permissions,
+                RC_HANDLE_CAMERA_PERM
+            )
             return
         }
 
@@ -71,7 +74,8 @@ abstract class AbstractActivity : AppCompatActivity() {
 
         val listener = View.OnClickListener {
             ActivityCompat.requestPermissions(thisActivity, permissions,
-                RC_HANDLE_CAMERA_PERM)
+                RC_HANDLE_CAMERA_PERM
+            )
         }
 
         Snackbar.make(mGraphicOverlay as View, R.string.permission_camera_rationale,
@@ -114,7 +118,9 @@ abstract class AbstractActivity : AppCompatActivity() {
         // check that the device has play services available.
         val code = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(applicationContext)
         if (code != ConnectionResult.SUCCESS) {
-            GoogleApiAvailability.getInstance().getErrorDialog(this, code, RC_HANDLE_GMS).show()
+            GoogleApiAvailability.getInstance().getErrorDialog(this, code,
+                RC_HANDLE_GMS
+            ).show()
         }
     }
 
@@ -149,7 +155,8 @@ abstract class AbstractActivity : AppCompatActivity() {
             return
         }
 
-        Log.e(TAG, "Permission not granted: results len = " + grantResults.size +
+        Log.e(
+            TAG, "Permission not granted: results len = " + grantResults.size +
                 " Result code = " + if (grantResults.isNotEmpty()) grantResults[0] else "(empty)")
 
         val listener = DialogInterface.OnClickListener { _, _ -> finish() }

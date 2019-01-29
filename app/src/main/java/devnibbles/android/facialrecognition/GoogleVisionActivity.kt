@@ -1,25 +1,52 @@
 package devnibbles.android.facialrecognition
 
+import android.os.Bundle
 import android.util.Log
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.MultiProcessor
 import com.google.android.gms.vision.Tracker
 import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.FaceDetector
-import devnibbles.android.facialrecognition.common.AbstractActivity
-import devnibbles.android.facialrecognition.googlevision.FaceGraphic
-import devnibbles.android.facialrecognition.googlevision.GVCameraSource
-import devnibbles.android.facialrecognition.googlevision.SaveFrameFaceDetector
+import devnibbles.android.facialrecognition.classify.MainViewModel
+import devnibbles.android.facialrecognition.classify.common.*
+import devnibbles.android.facialrecognition.detect.googlevision.FaceGraphic
+import devnibbles.android.facialrecognition.detect.googlevision.GVCameraSource
+import devnibbles.android.facialrecognition.detect.googlevision.SaveFrameFaceDetector
 import java.io.IOException
 
 class GoogleVisionActivity : AbstractActivity() {
 
     companion object {
         private const val TAG = "GoogleVisionActivity"
+        private const val REST_CLASSIFIER = true // flag to decide if we should use REST (true) or SDK (false) classifier.
     }
 
     private var mCameraSource: GVCameraSource? = null
     private lateinit var mDetector: SaveFrameFaceDetector
+    private lateinit var mViewModel: MainViewModel
+
+
+    override fun onCreate(icicle: Bundle?) {
+        super.onCreate(icicle)
+
+        mViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        mViewModel.subscribeClassifications().observe(this, Observer<Resource<String, Throwable>> { resource ->
+            when (resource) {
+                is LoadingResource -> {
+                    System.out.println("LoadingResource : " + resource.data)
+                }
+                is SuccessResource -> {
+                    System.out.println("SuccessResource : " + resource.data)
+                }
+                is ErrorResource -> {
+                    System.out.println("ErrorResource : " + resource.data)
+                    resource.errorData?.printStackTrace()
+                }
+            }
+        })
+    }
 
     /**
      * Creates and starts the camera.
@@ -100,6 +127,15 @@ class GoogleVisionActivity : AbstractActivity() {
          */
         override fun onNewItem(faceId: Int, item: Face) {
             mFaceGraphic = FaceGraphic(mGraphicOverlay)
+            mDetector.lastFrame?.let { frame ->
+                if (REST_CLASSIFIER) {
+                    mViewModel.classifyUsingRetrofit(frame.convertToByteArray())
+
+                } else {
+                    mViewModel.classifyUsingCloudSDK(frame.convertToByteArray())
+
+                }
+            }
         }
 
         /**

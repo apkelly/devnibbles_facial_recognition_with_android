@@ -1,4 +1,4 @@
-package devnibbles.android.facialrecognition.mlkit
+package devnibbles.android.facialrecognition.detect.mlkit
 
 import android.util.Log
 import androidx.annotation.GuardedBy

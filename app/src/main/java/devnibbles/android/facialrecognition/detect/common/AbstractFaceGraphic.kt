@@ -1,4 +1,4 @@
-package devnibbles.android.facialrecognition.common
+package devnibbles.android.facialrecognition.detect.common
 
 import android.graphics.Canvas
 import android.graphics.Color
@@ -20,7 +20,8 @@ abstract class AbstractFaceGraphic(graphicOverlay: GraphicOverlay) : GraphicOver
 
     init {
         mFacePositionPaint.color = Color.WHITE
-        mFacePositionPaint.textSize = TEXT_SIZE
+        mFacePositionPaint.textSize =
+                TEXT_SIZE
         mFacePositionPaint.textAlign = Paint.Align.CENTER
     }
 

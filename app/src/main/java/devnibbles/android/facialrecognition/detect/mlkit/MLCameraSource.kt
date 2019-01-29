@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package devnibbles.android.facialrecognition.mlkit
+package devnibbles.android.facialrecognition.detect.mlkit
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -27,8 +27,8 @@ import android.view.SurfaceHolder
 import android.view.WindowManager
 import androidx.annotation.RequiresPermission
 import com.google.android.gms.common.images.Size
-import devnibbles.android.facialrecognition.common.GraphicOverlay
-import devnibbles.android.facialrecognition.common.ICameraSource
+import devnibbles.android.facialrecognition.detect.common.GraphicOverlay
+import devnibbles.android.facialrecognition.detect.common.ICameraSource
 
 import java.io.IOException
 import java.lang.Thread.State
@@ -42,7 +42,8 @@ import java.util.IdentityHashMap
  * sending those frames to child classes' detectors / classifiers as fast as it is able to process.
  */
 @SuppressLint("MissingPermission")
-class MLCameraSource(private var activity: Activity, private val graphicOverlay: GraphicOverlay) : ICameraSource {
+class MLCameraSource(private var activity: Activity, private val graphicOverlay: GraphicOverlay) :
+    ICameraSource {
 
     private var camera: Camera? = null
 

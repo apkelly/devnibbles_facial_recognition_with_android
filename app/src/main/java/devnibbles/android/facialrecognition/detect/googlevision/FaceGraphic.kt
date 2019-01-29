@@ -1,11 +1,11 @@
-package devnibbles.android.facialrecognition.googlevision
+package devnibbles.android.facialrecognition.detect.googlevision
 
 import android.graphics.PointF
 
 import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.Landmark
-import devnibbles.android.facialrecognition.common.AbstractFaceGraphic
-import devnibbles.android.facialrecognition.common.GraphicOverlay
+import devnibbles.android.facialrecognition.detect.common.AbstractFaceGraphic
+import devnibbles.android.facialrecognition.detect.common.GraphicOverlay
 
 
 /**

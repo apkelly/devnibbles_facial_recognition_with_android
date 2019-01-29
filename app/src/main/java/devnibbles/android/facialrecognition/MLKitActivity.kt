@@ -2,11 +2,10 @@ package devnibbles.android.facialrecognition
 
 import android.util.Log
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
-import devnibbles.android.facialrecognition.common.AbstractActivity
-import devnibbles.android.facialrecognition.mlkit.FaceDetector
-import devnibbles.android.facialrecognition.mlkit.FaceGraphic
-import devnibbles.android.facialrecognition.mlkit.FrameMetadata
-import devnibbles.android.facialrecognition.mlkit.MLCameraSource
+import devnibbles.android.facialrecognition.detect.mlkit.FaceDetector
+import devnibbles.android.facialrecognition.detect.mlkit.FaceGraphic
+import devnibbles.android.facialrecognition.detect.mlkit.FrameMetadata
+import devnibbles.android.facialrecognition.detect.mlkit.MLCameraSource
 import java.io.IOException
 import java.nio.ByteBuffer
 

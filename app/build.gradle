@@ -28,9 +28,14 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.0.0'
     implementation 'androidx.appcompat:appcompat:1.0.2'
     implementation 'com.google.android.material:material:1.0.0'
+
+    // ViewModel dependencies
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.0.0'
+    kapt 'androidx.lifecycle:lifecycle-compiler:2.0.0'
 
     // Google Vision dependencies
     implementation 'com.google.android.gms:play-services-vision:17.0.2'
@@ -38,5 +43,18 @@ dependencies {
     // ML Kit dependencies
     implementation 'com.google.firebase:firebase-ml-vision:18.0.2'
     implementation 'com.google.firebase:firebase-ml-vision-face-model:17.0.2'
+
+    // Cloud AutoML SDK
+    implementation 'com.google.cloud:google-cloud-automl:0.55.1-beta'
+    implementation 'io.grpc:grpc-okhttp:1.13.1' // specific version needed for cloud-automl
+
+    // Retrofit
+    implementation 'com.google.code.gson:gson:2.8.5'
+    implementation 'com.squareup.retrofit2:retrofit:2.4.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.4.0'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.4.0'
+    implementation 'com.jakewharton.retrofit:retrofit2-kotlin-coroutines-adapter:0.9.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.11.0'
+
 }
 apply plugin: 'com.google.gms.google-services'

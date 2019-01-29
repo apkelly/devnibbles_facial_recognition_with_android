@@ -1,11 +1,11 @@
-package devnibbles.android.facialrecognition.mlkit
+package devnibbles.android.facialrecognition.detect.mlkit
 
 import android.graphics.PointF
 
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
 import com.google.firebase.ml.vision.face.FirebaseVisionFaceLandmark
-import devnibbles.android.facialrecognition.common.AbstractFaceGraphic
-import devnibbles.android.facialrecognition.common.GraphicOverlay
+import devnibbles.android.facialrecognition.detect.common.AbstractFaceGraphic
+import devnibbles.android.facialrecognition.detect.common.GraphicOverlay
 
 
 /**

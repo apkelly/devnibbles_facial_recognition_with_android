@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<devnibbles.android.facialrecognition.common.CameraSourcePreview
+<devnibbles.android.facialrecognition.detect.common.CameraSourcePreview
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-    <devnibbles.android.facialrecognition.common.GraphicOverlay
+    <devnibbles.android.facialrecognition.detect.common.GraphicOverlay
             android:id="@+id/faceOverlay"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-</devnibbles.android.facialrecognition.common.CameraSourcePreview>
+</devnibbles.android.facialrecognition.detect.common.CameraSourcePreview>

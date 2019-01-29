@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package devnibbles.android.facialrecognition.common
+package devnibbles.android.facialrecognition.detect.common
 
 import android.content.Context
 import android.graphics.Canvas

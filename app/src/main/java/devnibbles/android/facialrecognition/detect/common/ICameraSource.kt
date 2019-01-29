@@ -1,4 +1,4 @@
-package devnibbles.android.facialrecognition.common
+package devnibbles.android.facialrecognition.detect.common
 
 import android.view.SurfaceHolder
 

@@ -1,4 +1,4 @@
-package devnibbles.android.facialrecognition.googlevision
+package devnibbles.android.facialrecognition.detect.googlevision
 
 import android.util.SparseArray
 
