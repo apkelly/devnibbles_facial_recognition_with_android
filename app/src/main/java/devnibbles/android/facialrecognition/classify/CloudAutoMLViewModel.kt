@@ -10,7 +10,10 @@ import com.google.gson.GsonBuilder
 import com.google.protobuf.ByteString
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import devnibbles.android.facialrecognition.classify.common.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -47,8 +50,16 @@ class MainViewModel : AbstractViewModel() {
         launch(handler) {
             mResult.value = LoadingResource("Classifying...")
 
-            val body = CloudAutoMLModel(Payload(devnibbles.android.facialrecognition.classify.MlImage(String(Base64.encodeBase64(imageBytes)))))
-            val response = provideService(provideGsonConverter(), provideNetworkClient()).classify(
+            val body = CloudAutoMLModel(
+                Payload(
+                    MlImage(
+                        String(
+                            Base64.encodeBase64(imageBytes)
+                        )
+                    )
+                )
+            )
+            val response = getRESTService().classify(
                 "Bearer $ACCESS_TOKEN",
                 PROJECT, LOCATION, MODEL, body
             ).await()
@@ -106,7 +117,16 @@ class MainViewModel : AbstractViewModel() {
         }
     }
 
-    private fun provideService(gsonFactory: GsonConverterFactory, networkClient: OkHttpClient): CloudAutoMLService {
+    private fun getRESTService(): CloudAutoMLService {
+        val gsonFactory = GsonConverterFactory
+            .create(GsonBuilder().create())
+
+        val networkClient = OkHttpClient.Builder()
+            .addInterceptor(HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            })
+            .build()
+
         return Retrofit.Builder()
             .baseUrl("https://automl.googleapis.com/")
             .addCallAdapterFactory(CoroutineCallAdapterFactory())
@@ -114,19 +134,6 @@ class MainViewModel : AbstractViewModel() {
             .client(networkClient)
             .build()
             .create(CloudAutoMLService::class.java)
-    }
-
-    private fun provideGsonConverter(): GsonConverterFactory {
-        return GsonConverterFactory.create(GsonBuilder().create())
-    }
-
-    private fun provideNetworkClient(): OkHttpClient {
-        val logger = HttpLoggingInterceptor()
-        logger.level = HttpLoggingInterceptor.Level.BODY
-
-        return OkHttpClient.Builder()
-            .addInterceptor(logger)
-            .build()
     }
 
 }
