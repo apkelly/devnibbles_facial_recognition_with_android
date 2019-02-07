@@ -130,6 +130,7 @@ class GoogleVisionActivity : AbstractActivity() {
         override fun onNewItem(faceId: Int, item: Face) {
             mFaceGraphic = FaceGraphic(faceId, mGraphicOverlay)
             mDetector.lastFrame?.let { frame ->
+                // Lets try and find out who this face belongs to
                 mViewModel.classify(faceId, frame.convertToByteArray())
             }
         }

@@ -24,8 +24,7 @@ abstract class AbstractFaceGraphic(faceId: Int, graphicOverlay: GraphicOverlay) 
 
     init {
         mFacePositionPaint.color = Color.WHITE
-        mFacePositionPaint.textSize =
-            TEXT_SIZE
+        mFacePositionPaint.textSize = TEXT_SIZE
         mFacePositionPaint.textAlign = Paint.Align.CENTER
     }
 

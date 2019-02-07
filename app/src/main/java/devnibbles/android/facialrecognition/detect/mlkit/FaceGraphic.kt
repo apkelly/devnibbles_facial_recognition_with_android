@@ -12,7 +12,7 @@ import devnibbles.android.facialrecognition.detect.common.GraphicOverlay
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
  * graphic overlay view.
  */
-class FaceGraphic(private val face: FirebaseVisionFace, graphicOverlay: GraphicOverlay) :
+class FaceGraphic(private var face: FirebaseVisionFace, graphicOverlay: GraphicOverlay) :
     AbstractFaceGraphic(face.trackingId, graphicOverlay) {
 
     override fun leftEyePosition(): PointF? {
@@ -34,6 +34,11 @@ class FaceGraphic(private val face: FirebaseVisionFace, graphicOverlay: GraphicO
             face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE)?.position?.x ?: 0f,
             face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE)?.position?.y ?: 0f
         )
+    }
+
+    fun updateFace(face: FirebaseVisionFace) {
+        this.face = face
+        postInvalidate()
     }
 }
 
