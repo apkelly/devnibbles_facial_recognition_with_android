@@ -25,6 +25,9 @@ import java.nio.charset.Charset
 class MainViewModel : AbstractViewModel() {
 
     companion object {
+        private const val REST_CLASSIFIER =
+            false // flag to decide if we should use REST (true) or SDK (false) classifier.
+
         private const val PROJECT = "devnibbles"
         private const val LOCATION = "us-central1"
         private const val MODEL = "ICN3704829353327390855"
@@ -36,19 +39,29 @@ class MainViewModel : AbstractViewModel() {
         .fromStream(ByteArrayInputStream(SERVICE_ACCOUNT_JSON.toByteArray(Charset.defaultCharset())))
         .createScoped(mutableListOf("https://www.googleapis.com/auth/cloud-platform"))
 
+    private val errorHandler = CoroutineExceptionHandler { _, throwable ->
+        mResult.postValue(ErrorResource(throwable))
+    }
 
-    private val mResult = MutableLiveData<Resource<String, Throwable>>()
+    private val mResult = MutableLiveData<Resource<Pair<Int, String>, Throwable>>()
 
-    fun subscribeClassifications(): LiveData<Resource<String, Throwable>> {
+    fun subscribeClassifications(): LiveData<Resource<Pair<Int, String>, Throwable>> {
         return mResult
     }
 
-    fun classifyUsingRetrofit(imageBytes: ByteArray) {
-        val handler = CoroutineExceptionHandler { _, throwable ->
-            mResult.postValue(ErrorResource(throwable))
+    fun classify(faceId: Int, imageBytes: ByteArray) {
+        if (REST_CLASSIFIER) {
+            classifyUsingRetrofit(faceId, imageBytes)
+
+        } else {
+            classifyUsingCloudSDK(faceId, imageBytes)
+
         }
-        launch(handler) {
-            mResult.value = LoadingResource("Classifying...")
+    }
+
+    private fun classifyUsingRetrofit(faceId: Int, imageBytes: ByteArray) {
+        launch(errorHandler) {
+            mResult.value = LoadingResource(null)
 
             val body = CloudAutoMLModel(
                 Payload(
@@ -66,17 +79,13 @@ class MainViewModel : AbstractViewModel() {
 
             System.out.println("Response : " + response)
 
-            mResult.value = SuccessResource("Andrew Kelly")
+            mResult.value = SuccessResource(Pair(-1, "Andrew Kelly"))
         }
     }
 
-
-    fun classifyUsingCloudSDK(imageBytes: ByteArray) {
-        val handler = CoroutineExceptionHandler { _, throwable ->
-            mResult.postValue(ErrorResource(throwable))
-        }
-        launch(handler) {
-            mResult.value = LoadingResource("Classifying...")
+    private fun classifyUsingCloudSDK(faceId: Int, imageBytes: ByteArray) {
+        launch(errorHandler) {
+            mResult.value = LoadingResource(null)
 
             withContext(Dispatchers.IO) {
                 val image = Image.newBuilder().setImageBytes(ByteString.copyFrom(imageBytes)).build()
@@ -105,12 +114,12 @@ class MainViewModel : AbstractViewModel() {
                         }
 
                         if (predictedName != null) {
-                            mResult.value = SuccessResource(predictedName!!)
+                            mResult.postValue(SuccessResource(Pair(faceId, predictedName!!)))
                         } else {
-                            mResult.value = ErrorResource(null, "Not recognised (001)")
+                            mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (001)")))
                         }
                     } else {
-                        mResult.value = ErrorResource(null, "Not recognised (002)")
+                        mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (002)")))
                     }
                 }
             }

@@ -6,7 +6,8 @@ import android.graphics.Paint
 import android.graphics.PointF
 
 
-abstract class AbstractFaceGraphic(graphicOverlay: GraphicOverlay) : GraphicOverlay.Graphic(graphicOverlay) {
+abstract class AbstractFaceGraphic(faceId: Int, graphicOverlay: GraphicOverlay) :
+    GraphicOverlay.Graphic(faceId, graphicOverlay) {
 
     companion object {
         private const val DOT_RADIUS = 10.0f
@@ -17,12 +18,20 @@ abstract class AbstractFaceGraphic(graphicOverlay: GraphicOverlay) : GraphicOver
 
     abstract fun leftEyePosition(): PointF?
     abstract fun rightEyePosition(): PointF?
+    abstract fun namePosition(): PointF?
+
+    private var name: String? = null
 
     init {
         mFacePositionPaint.color = Color.WHITE
         mFacePositionPaint.textSize =
-                TEXT_SIZE
+            TEXT_SIZE
         mFacePositionPaint.textAlign = Paint.Align.CENTER
+    }
+
+    fun setName(name: String) {
+        this.name = name
+        postInvalidate()
     }
 
     override fun draw(canvas: Canvas) {
@@ -42,6 +51,17 @@ abstract class AbstractFaceGraphic(graphicOverlay: GraphicOverlay) : GraphicOver
                 DOT_RADIUS,
                 mFacePositionPaint
             )
+        }
+
+        namePosition()?.let { position ->
+            if (name != null) {
+                canvas.drawText(
+                    name!!,
+                    translateX(position.x),
+                    translateY(position.y),
+                    mFacePositionPaint
+                )
+            }
         }
     }
 }

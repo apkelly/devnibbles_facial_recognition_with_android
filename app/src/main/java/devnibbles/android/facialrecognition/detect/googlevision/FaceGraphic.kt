@@ -12,7 +12,7 @@ import devnibbles.android.facialrecognition.detect.common.GraphicOverlay
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
  * graphic overlay view.
  */
-class FaceGraphic(graphicOverlay: GraphicOverlay) : AbstractFaceGraphic(graphicOverlay) {
+class FaceGraphic(faceId: Int, graphicOverlay: GraphicOverlay) : AbstractFaceGraphic(faceId, graphicOverlay) {
 
     private var face: Face? = null
 
@@ -22,6 +22,10 @@ class FaceGraphic(graphicOverlay: GraphicOverlay) : AbstractFaceGraphic(graphicO
 
     override fun leftEyePosition() : PointF? {
         return face?.landmarks?.firstOrNull { it.type == Landmark.LEFT_EYE }?.position
+    }
+
+    override fun namePosition() : PointF? {
+        return face?.landmarks?.firstOrNull { it.type == Landmark.NOSE_BASE }?.position
     }
 
     fun updateFace(face: Face) {

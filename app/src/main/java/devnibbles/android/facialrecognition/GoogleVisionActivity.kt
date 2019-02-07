@@ -20,32 +20,34 @@ class GoogleVisionActivity : AbstractActivity() {
 
     companion object {
         private const val TAG = "GoogleVisionActivity"
-        private const val REST_CLASSIFIER = true // flag to decide if we should use REST (true) or SDK (false) classifier.
     }
 
     private var mCameraSource: GVCameraSource? = null
     private lateinit var mDetector: SaveFrameFaceDetector
     private lateinit var mViewModel: MainViewModel
 
-
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
 
         mViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
-        mViewModel.subscribeClassifications().observe(this, Observer<Resource<String, Throwable>> { resource ->
-            when (resource) {
-                is LoadingResource -> {
-                    System.out.println("LoadingResource : " + resource.data)
+        mViewModel.subscribeClassifications()
+            .observe(this, Observer<Resource<Pair<Int, String>, Throwable>> { resource ->
+                when (resource) {
+                    is LoadingResource -> {
+                        System.out.println("Classifying...")
+                    }
+                    is SuccessResource -> {
+                        System.out.println("SuccessResource : " + resource.data)
+                        val faceId = resource.data.first
+                        val name = resource.data.second
+                        (mGraphicOverlay.find(faceId) as? FaceGraphic)?.setName(name)
+                    }
+                    is ErrorResource -> {
+                        System.out.println("ErrorResource : " + resource.data)
+                        resource.errorData?.printStackTrace()
+                    }
                 }
-                is SuccessResource -> {
-                    System.out.println("SuccessResource : " + resource.data)
-                }
-                is ErrorResource -> {
-                    System.out.println("ErrorResource : " + resource.data)
-                    resource.errorData?.printStackTrace()
-                }
-            }
-        })
+            })
     }
 
     /**
@@ -126,15 +128,9 @@ class GoogleVisionActivity : AbstractActivity() {
          * Start tracking the detected face instance within the face overlay.
          */
         override fun onNewItem(faceId: Int, item: Face) {
-            mFaceGraphic = FaceGraphic(mGraphicOverlay)
+            mFaceGraphic = FaceGraphic(faceId, mGraphicOverlay)
             mDetector.lastFrame?.let { frame ->
-                if (REST_CLASSIFIER) {
-                    mViewModel.classifyUsingRetrofit(frame.convertToByteArray())
-
-                } else {
-                    mViewModel.classifyUsingCloudSDK(frame.convertToByteArray())
-
-                }
+                mViewModel.classify(faceId, frame.convertToByteArray())
             }
         }
 

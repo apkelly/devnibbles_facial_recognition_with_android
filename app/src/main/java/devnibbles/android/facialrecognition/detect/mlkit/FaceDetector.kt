@@ -32,6 +32,7 @@ class FaceDetector(private val callback: DetectorCallback?) : IFrameProcessor {
     private val delegateDetector = FirebaseVision.getInstance()
         .getVisionFaceDetector(
             FirebaseVisionFaceDetectorOptions.Builder()
+                .enableTracking()
                 .setLandmarkMode(FirebaseVisionFaceDetectorOptions.ALL_LANDMARKS)
                 .build()
         )

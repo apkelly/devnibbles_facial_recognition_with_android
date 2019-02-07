@@ -13,7 +13,7 @@ import devnibbles.android.facialrecognition.detect.common.GraphicOverlay
  * graphic overlay view.
  */
 class FaceGraphic(private val face: FirebaseVisionFace, graphicOverlay: GraphicOverlay) :
-    AbstractFaceGraphic(graphicOverlay) {
+    AbstractFaceGraphic(face.trackingId, graphicOverlay) {
 
     override fun leftEyePosition(): PointF? {
         return PointF(
@@ -26,6 +26,13 @@ class FaceGraphic(private val face: FirebaseVisionFace, graphicOverlay: GraphicO
         return PointF(
             face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EYE)?.position?.x ?: 0f,
             face.getLandmark(FirebaseVisionFaceLandmark.RIGHT_EYE)?.position?.y ?: 0f
+        )
+    }
+
+    override fun namePosition(): PointF? {
+        return PointF(
+            face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE)?.position?.x ?: 0f,
+            face.getLandmark(FirebaseVisionFaceLandmark.NOSE_BASE)?.position?.y ?: 0f
         )
     }
 }

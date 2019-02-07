@@ -20,8 +20,6 @@ import android.graphics.Canvas
 import android.util.AttributeSet
 import android.view.View
 
-import java.util.HashSet
-
 /**
  * A view which renders a series of custom graphics to be overlayed on top of an associated preview
  * (i.e., the camera preview).  The creator can add graphics objects, update the objects, and remove
@@ -67,7 +65,7 @@ class GraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attr
      * this and implement the [Graphic.draw] method to define the
      * graphics element.  Add instances to the overlay using [GraphicOverlay.add].
      */
-    abstract class Graphic(private val mOverlay: GraphicOverlay) {
+    abstract class Graphic(val id: Int, private val mOverlay: GraphicOverlay) {
 
         /**
          * Draw the graphic on the supplied canvas.  Drawing should use the following methods to
@@ -143,6 +141,10 @@ class GraphicOverlay(context: Context, attrs: AttributeSet) : View(context, attr
             }
             postInvalidate()
         }
+    }
+
+    fun find(id: Int): Graphic? {
+        return mGraphics.find { it.id == id }
     }
 
     /**
