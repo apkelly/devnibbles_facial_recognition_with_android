@@ -68,7 +68,7 @@ class MLKitActivity : AbstractActivity() {
                         val existingFace = mGraphicOverlay.find(face.trackingId) as FaceGraphic?
                         if (existingFace == null) {
                             // A new face has been detected.
-                            val faceGraphic = FaceGraphic(face, mGraphicOverlay)
+                            val faceGraphic = FaceGraphic(face.trackingId, mGraphicOverlay)
                             mGraphicOverlay.add(faceGraphic)
 
                             // Lets try and find out who this face belongs to
