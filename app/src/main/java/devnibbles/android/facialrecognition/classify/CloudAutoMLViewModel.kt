@@ -77,9 +77,27 @@ class MainViewModel : AbstractViewModel() {
                 PROJECT, LOCATION, MODEL, body
             ).await()
 
-            System.out.println("Response : " + response)
+            System.out.println("Response : " + response.payload?.size + " : " + response.payload?.firstOrNull()?.displayName)
 
-            mResult.value = SuccessResource(Pair(-1, "Andrew Kelly"))
+            if (response.payload?.isNotEmpty() == true) {
+                // We have a prediction!
+                var predictedName: String? = null
+
+                response.payload.forEach { entry ->
+                    // TODO: Check that score is within a valid threshold.
+                    if (entry.displayName != null) {
+                        predictedName = entry.displayName
+                    }
+                }
+
+                if (predictedName != null) {
+                    mResult.postValue(SuccessResource(Pair(faceId, predictedName!!)))
+                } else {
+                    mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (001)")))
+                }
+            } else {
+                mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (002)")))
+            }
         }
     }
 

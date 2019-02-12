@@ -19,5 +19,10 @@ interface CloudAutoMLService {
         @Path("location") location: String,
         @Path("model") model: String,
         @Body body: CloudAutoMLModel
-    ): Deferred<String>
+    ): Deferred<CloudResponse>
+
+    data class Score(val score: Double)
+    data class Classification(val classification: Score?, val displayName: String?)
+    data class CloudResponse(val payload: List<Classification>?)
+
 }
