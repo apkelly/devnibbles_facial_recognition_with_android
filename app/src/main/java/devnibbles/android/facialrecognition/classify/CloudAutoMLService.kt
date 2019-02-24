@@ -10,6 +10,18 @@ import retrofit2.http.Path
 // -H "Authorization: Bearer <access_token>" \
 // https://automl.googleapis.com/v1beta1/projects/devnibbles/locations/us-central1/models/ICN3704829353327390855:predict -d @request.json
 
+// Expected json response from webservice
+//{
+//  "payload": [
+//    {
+//      "classification": {
+//        "score": 0.87991875
+//      },
+//      "displayName": "Andy"
+//    }
+//  ]
+//}
+
 interface CloudAutoMLService {
 
     @POST("/v1beta1/projects/{project}/locations/{location}/models/{model}:predict")

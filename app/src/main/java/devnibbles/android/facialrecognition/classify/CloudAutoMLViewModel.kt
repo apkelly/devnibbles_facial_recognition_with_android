@@ -61,8 +61,10 @@ class MainViewModel : AbstractViewModel() {
 
     private fun classifyUsingRetrofit(faceId: Int, imageBytes: ByteArray) {
         launch(errorHandler) {
+            // Show loading indicator while we wait for the request.
             mResult.value = LoadingResource(null)
 
+            // Build the body of our request, essentially the image to be classified.
             val body = CloudAutoMLModel(
                 Payload(
                     MlImage(
@@ -72,6 +74,8 @@ class MainViewModel : AbstractViewModel() {
                     )
                 )
             )
+
+            // Define the authentication credentials and make the API request
             val response = getRESTService().classify(
                 "Bearer $ACCESS_TOKEN",
                 PROJECT, LOCATION, MODEL, body
@@ -91,11 +95,14 @@ class MainViewModel : AbstractViewModel() {
                 }
 
                 if (predictedName != null) {
+                    // We had an actual name returned
                     mResult.postValue(SuccessResource(Pair(faceId, predictedName!!)))
                 } else {
+                    // No name was returned, this is an unknown face.
                     mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (001)")))
                 }
             } else {
+                // There were no payloads returned, possible error or unknown face.
                 mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (002)")))
             }
         }
@@ -103,18 +110,23 @@ class MainViewModel : AbstractViewModel() {
 
     private fun classifyUsingCloudSDK(faceId: Int, imageBytes: ByteArray) {
         launch(errorHandler) {
+            // Show loading indicator while we wait for the request.
             mResult.value = LoadingResource(null)
 
             withContext(Dispatchers.IO) {
-                val image = Image.newBuilder().setImageBytes(ByteString.copyFrom(imageBytes)).build()
-
+                // Define the authentication credentials
                 val settings = PredictionServiceSettings.newBuilder()
                     .setCredentialsProvider(FixedCredentialsProvider.create(mServiceCredentials)).build()
+
                 val predictionServiceClient = PredictionServiceClient.create(settings)
                 predictionServiceClient.use { client ->
+                    // Build the body of our request, essentially the image to be classified.
                     val name = ModelName.of(PROJECT, LOCATION, MODEL)
+                    val image = Image.newBuilder().setImageBytes(ByteString.copyFrom(imageBytes)).build()
                     val payload = ExamplePayload.newBuilder().setImage(image).build()
                     val params = HashMap<String, String>()
+
+                    // Make the API request.
                     val response = client.predict(name, payload, params)
 
                     System.out.println("response : $response")
@@ -132,11 +144,14 @@ class MainViewModel : AbstractViewModel() {
                         }
 
                         if (predictedName != null) {
+                            // We had an actual name returned
                             mResult.postValue(SuccessResource(Pair(faceId, predictedName!!)))
                         } else {
+                            // No name was returned, this is an unknown face.
                             mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (001)")))
                         }
                     } else {
+                        // There were no payloads returned, possible error or unknown face.
                         mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (002)")))
                     }
                 }
