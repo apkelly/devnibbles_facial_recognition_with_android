@@ -9,7 +9,7 @@ import com.google.android.gms.vision.MultiProcessor
 import com.google.android.gms.vision.Tracker
 import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.FaceDetector
-import devnibbles.android.facialrecognition.classify.MainViewModel
+import devnibbles.android.facialrecognition.classify.CloudAutoMLViewModel
 import devnibbles.android.facialrecognition.classify.common.*
 import devnibbles.android.facialrecognition.detect.googlevision.FaceGraphic
 import devnibbles.android.facialrecognition.detect.googlevision.GVCameraSource
@@ -24,12 +24,12 @@ class GoogleVisionActivity : AbstractActivity() {
 
     private var mCameraSource: GVCameraSource? = null
     private lateinit var mDetector: SaveFrameFaceDetector
-    private lateinit var mViewModel: MainViewModel
+    private lateinit var mViewModel: CloudAutoMLViewModel
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
 
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        mViewModel = ViewModelProviders.of(this).get(CloudAutoMLViewModel::class.java)
         mViewModel.subscribeClassifications()
             .observe(this, Observer<Resource<Pair<Int, String>, Throwable>> { resource ->
                 when (resource) {

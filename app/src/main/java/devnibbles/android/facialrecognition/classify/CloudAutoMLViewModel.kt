@@ -22,7 +22,7 @@ import java.io.ByteArrayInputStream
 import java.nio.charset.Charset
 
 
-class MainViewModel : AbstractViewModel() {
+class CloudAutoMLViewModel : AbstractViewModel() {
 
     companion object {
         private const val REST_CLASSIFIER =

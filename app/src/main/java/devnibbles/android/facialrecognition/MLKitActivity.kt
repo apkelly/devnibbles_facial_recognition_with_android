@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.google.firebase.ml.vision.face.FirebaseVisionFace
-import devnibbles.android.facialrecognition.classify.MainViewModel
+import devnibbles.android.facialrecognition.classify.CloudAutoMLViewModel
 import devnibbles.android.facialrecognition.classify.common.*
 import devnibbles.android.facialrecognition.detect.mlkit.FaceDetector
 import devnibbles.android.facialrecognition.detect.mlkit.FaceGraphic
@@ -22,12 +22,12 @@ class MLKitActivity : AbstractActivity() {
     }
 
     private var mCameraSource: MLCameraSource? = null
-    private lateinit var mViewModel: MainViewModel
+    private lateinit var mViewModel: CloudAutoMLViewModel
 
     override fun onCreate(icicle: Bundle?) {
         super.onCreate(icicle)
 
-        mViewModel = ViewModelProviders.of(this).get(MainViewModel::class.java)
+        mViewModel = ViewModelProviders.of(this).get(CloudAutoMLViewModel::class.java)
         mViewModel.subscribeClassifications()
             .observe(this, Observer<Resource<Pair<Int, String>, Throwable>> { resource ->
                 when (resource) {
