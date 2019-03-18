@@ -29,16 +29,17 @@ class MLKitActivity : AbstractActivity() {
 
         mViewModel = ViewModelProviders.of(this).get(CloudAutoMLViewModel::class.java)
         mViewModel.subscribeClassifications()
-            .observe(this, Observer<Resource<Pair<Int, String>, Throwable>> { resource ->
+            .observe(this, Observer<Resource<FaceClassification, Throwable>> { resource ->
                 when (resource) {
                     is LoadingResource -> {
                         System.out.println("Classifying...")
                     }
                     is SuccessResource -> {
                         System.out.println("SuccessResource : " + resource.data)
-                        val faceId = resource.data.first
-                        val name = resource.data.second
-                        (mGraphicOverlay.find(faceId) as? FaceGraphic)?.setName(name)
+                        val faceId = resource.data.faceId
+                        val name = resource.data.name
+                        val score = resource.data.confidence
+                        (mGraphicOverlay.find(faceId) as? FaceGraphic)?.setName("$name ($score)")
                     }
                     is ErrorResource -> {
                         System.out.println("ErrorResource : " + resource.data)

@@ -420,7 +420,7 @@ class MLCameraSource(private var activity: Activity, private val graphicOverlay:
          */
         @SuppressLint("Assert")
         internal fun release() {
-            assert(processingThread!!.state == State.TERMINATED)
+            assert(processingThread?.state == State.TERMINATED)
         }
 
         /** Marks the runnable as active/not active. Signals any blocked threads to continue.  */

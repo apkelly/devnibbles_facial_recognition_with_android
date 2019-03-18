@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.google.api.client.util.Base64
 import com.google.api.gax.core.FixedCredentialsProvider
+import com.google.auth.oauth2.AccessToken
 import com.google.auth.oauth2.ServiceAccountCredentials
 import com.google.cloud.automl.v1beta1.*
 import com.google.gson.GsonBuilder
@@ -31,7 +32,6 @@ class CloudAutoMLViewModel : AbstractViewModel() {
         private const val PROJECT = "devnibbles"
         private const val LOCATION = "us-central1"
         private const val MODEL = "ICN3704829353327390855"
-        private const val ACCESS_TOKEN = "<insert token here>"
         private const val SERVICE_ACCOUNT_JSON = "<insert json here>"
     }
 
@@ -43,10 +43,21 @@ class CloudAutoMLViewModel : AbstractViewModel() {
         mResult.postValue(ErrorResource(throwable))
     }
 
-    private val mResult = MutableLiveData<Resource<Pair<Int, String>, Throwable>>()
+    private val mResult = MutableLiveData<Resource<FaceClassification, Throwable>>()
 
-    fun subscribeClassifications(): LiveData<Resource<Pair<Int, String>, Throwable>> {
+    fun subscribeClassifications(): LiveData<Resource<FaceClassification, Throwable>> {
         return mResult
+    }
+
+    private var accessToken: AccessToken? = null
+
+    init {
+        Thread {
+            accessToken = mServiceCredentials.accessToken
+            if (accessToken == null) {
+                accessToken = mServiceCredentials.refreshAccessToken()
+            }
+        }.start()
     }
 
     fun classify(faceId: Int, imageBytes: ByteArray) {
@@ -77,7 +88,7 @@ class CloudAutoMLViewModel : AbstractViewModel() {
 
             // Define the authentication credentials and make the API request
             val response = getRESTService().classify(
-                "Bearer $ACCESS_TOKEN",
+                "Bearer ${accessToken?.tokenValue}",
                 PROJECT, LOCATION, MODEL, body
             ).await()
 
@@ -86,24 +97,33 @@ class CloudAutoMLViewModel : AbstractViewModel() {
             if (response.payload?.isNotEmpty() == true) {
                 // We have a prediction!
                 var predictedName: String? = null
+                var predictedConfidence: Double? = null
 
                 response.payload.forEach { entry ->
-                    // TODO: Check that score is within a valid threshold.
                     if (entry.displayName != null) {
                         predictedName = entry.displayName
+                        predictedConfidence = entry.classification?.score
                     }
                 }
 
-                if (predictedName != null) {
+                if (predictedName != null && predictedConfidence != null) {
                     // We had an actual name returned
-                    mResult.postValue(SuccessResource(Pair(faceId, predictedName!!)))
+                    mResult.postValue(
+                        SuccessResource(
+                            FaceClassification(
+                                faceId,
+                                predictedName!!,
+                                predictedConfidence!!
+                            )
+                        )
+                    )
                 } else {
                     // No name was returned, this is an unknown face.
-                    mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (001)")))
+                    mResult.postValue(ErrorResource(null))
                 }
             } else {
                 // There were no payloads returned, possible error or unknown face.
-                mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (002)")))
+                mResult.postValue(ErrorResource(null))
             }
         }
     }
@@ -134,25 +154,37 @@ class CloudAutoMLViewModel : AbstractViewModel() {
                     if (response.payloadCount > 0) {
                         // We have a prediction!
                         var predictedName: String? = null
+                        var predictedConfidence: Double? = null
+
                         response.getPayload(0).allFields.entries.forEach { entry ->
                             System.out.println("Entry : ${entry.key.jsonName} = ${entry.value}")
 
-                            // TODO: Check that score is within a valid threshold.
                             if (entry.key.jsonName == "displayName") {
                                 predictedName = entry.value as String
+                            } else if (entry.key.jsonName == "classification") {
+                                val classification = entry.value as ClassificationProto.ClassificationAnnotation
+                                predictedConfidence= classification.score.toDouble()
                             }
                         }
 
-                        if (predictedName != null) {
+                        if (predictedName != null && predictedConfidence != null) {
                             // We had an actual name returned
-                            mResult.postValue(SuccessResource(Pair(faceId, predictedName!!)))
+                            mResult.postValue(
+                                SuccessResource(
+                                    FaceClassification(
+                                        faceId,
+                                        predictedName!!,
+                                        predictedConfidence!!
+                                    )
+                                )
+                            )
                         } else {
                             // No name was returned, this is an unknown face.
-                            mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (001)")))
+                            mResult.postValue(ErrorResource(null))
                         }
                     } else {
                         // There were no payloads returned, possible error or unknown face.
-                        mResult.postValue(ErrorResource(null, Pair(-1, "Not recognised (002)")))
+                        mResult.postValue(ErrorResource(null))
                     }
                 }
             }
